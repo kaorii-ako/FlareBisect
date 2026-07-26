@@ -75,11 +75,19 @@ flarebisect config set-key google AI...
 flarebisect config use ollama
 flarebisect config set-model ollama llama3.1
 
+# or let flarebisect pick a model sized to your GPU and pull it for you
+flarebisect models detect   # shows detected GPU/VRAM + recommended model
+flarebisect models pull     # downloads it and sets it active (run with no args)
+
 # any other OpenAI-compatible endpoint
 flarebisect config use custom
 flarebisect config set-base-url custom http://localhost:8080/v1
 flarebisect config set-key custom sk-local
 ```
+
+Run `flarebisect config` with no arguments for a guided setup wizard — for
+Ollama it detects your GPU/VRAM, prefills a right-sized model, and offers to
+pull it on the spot.
 
 `flarebisect config show` lists the active provider and stored settings
 (keys are masked). Config lives in a JSON file under the OS config dir

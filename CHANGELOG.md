@@ -4,6 +4,18 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.3.0] - 2026-07-26
+
+### Added
+- `flarebisect models detect` — detects your GPU (NVIDIA/AMD/Apple
+  Silicon/Windows WMI fallback) and VRAM, and recommends a right-sized
+  Ollama model.
+- `flarebisect models pull [MODEL]` — downloads a local model via `ollama
+  pull`, auto-sized to your hardware if no model is given, and sets it as
+  the active provider.
+- Interactive config wizard now auto-detects your GPU/VRAM when you pick
+  Ollama, prefills the recommended model, and offers to pull it immediately.
+
 ## [0.2.0] - 2026-07-26
 
 ### Added

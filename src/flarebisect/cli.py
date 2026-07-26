@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from typing import Optional
 
@@ -7,13 +8,15 @@ import typer
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
 
-from . import __version__, ai_explain, config as config_store, git_ops, report
+from . import __version__, ai_explain, config as config_store, git_ops, hardware, report
 from .bisect import run_bisect
 from .providers import DEFAULT_BASE_URLS, DEFAULT_MODELS, NO_KEY_REQUIRED, PROVIDERS, ProviderError
 
 app = typer.Typer(add_completion=False, help="git bisect that treats flakiness as a signal, not noise.")
 config_app = typer.Typer(add_completion=False, help="Manage stored AI provider settings.")
+models_app = typer.Typer(add_completion=False, help="Detect your GPU/VRAM and manage local Ollama models.")
 app.add_typer(config_app, name="config")
+app.add_typer(models_app, name="models")
 
 PROVIDER_BLURBS = {
     "anthropic": "Claude, cloud, needs an API key",
@@ -137,6 +140,15 @@ def config_wizard() -> None:
     console.print()
     console.print("[bold]step 3/4[/bold] — model")
     default_model = DEFAULT_MODELS.get(provider, "")
+    if provider == "ollama":
+        gpu = hardware.detect_gpu()
+        recommended, desc = hardware.recommend_model_with_desc(gpu.vram_gb)
+        if gpu.vendor == "none":
+            console.print("  [dim]no dedicated GPU detected — recommending a small CPU-friendly model[/dim]")
+        else:
+            console.print(f"  [dim]detected {gpu.name} (~{gpu.vram_gb} GB VRAM)[/dim]")
+        console.print(f"  [dim]recommended: {recommended} — {desc}[/dim]")
+        default_model = recommended
     model = Prompt.ask("  model", default=default_model)
 
     console.print()
@@ -151,6 +163,21 @@ def config_wizard() -> None:
         config_store.set_base_url(provider, base_url)
     if make_active:
         config_store.use_provider(provider)
+
+    if provider == "ollama":
+        if hardware.ollama_available():
+            if Confirm.ask(f"  pull '{model}' now via ollama?", default=True):
+                console.print()
+                try:
+                    hardware.pull_model(model)
+                    console.print(f"[green]pulled {model}[/green]")
+                except (RuntimeError, subprocess.CalledProcessError) as e:
+                    report.print_error(f"pull failed: {e}")
+        else:
+            console.print(
+                "  [yellow]ollama not found on PATH[/yellow] — install it from https://ollama.com, "
+                "then run `flarebisect models pull`"
+            )
 
     masked_key = f"...{api_key[-4:]}" if api_key and len(api_key) > 4 else ("(none)" if not api_key else "(set)")
     console.print()
@@ -232,6 +259,52 @@ def config_show() -> None:
             f"{marker} {name:<10} key={masked:<10} model={stored.get('model') or '(default)':<20} "
             f"base_url={stored.get('base_url') or '(default)'}"
         )
+
+
+@models_app.command("detect")
+def models_detect() -> None:
+    """Detect your GPU/VRAM and show the recommended local model."""
+    console = report.console
+    gpu = hardware.detect_gpu()
+    model, desc = hardware.recommend_model_with_desc(gpu.vram_gb)
+    console.print()
+    if gpu.vendor == "none":
+        console.print("[yellow]no dedicated GPU detected[/yellow] — falling back to a small CPU-friendly model")
+    else:
+        console.print(f"GPU: [bold]{gpu.name}[/bold] ({gpu.vendor}) — ~{gpu.vram_gb} GB VRAM")
+    console.print(f"recommended model: [bold cyan]{model}[/bold cyan] — {desc}")
+    console.print("[dim]run `flarebisect models pull` to download it[/dim]")
+
+
+@models_app.command("pull")
+def models_pull(
+    model: Optional[str] = typer.Argument(None, help="Model tag to pull (default: auto-detected from your GPU)."),
+    set_active: bool = typer.Option(
+        True, "--set-active/--no-set-active", help="Set ollama as the active provider with this model."
+    ),
+) -> None:
+    """Download a local model via Ollama, sized to your GPU's VRAM."""
+    console = report.console
+    gpu = hardware.detect_gpu()
+    chosen = model or hardware.recommend_model(gpu.vram_gb)
+    if not model:
+        console.print(f"detected [bold]{gpu.name}[/bold] (~{gpu.vram_gb} GB VRAM) — pulling [bold cyan]{chosen}[/bold cyan]")
+    else:
+        console.print(f"pulling [bold cyan]{chosen}[/bold cyan]")
+
+    try:
+        hardware.pull_model(chosen)
+    except RuntimeError as e:
+        report.print_error(str(e))
+        raise typer.Exit(1)
+    except subprocess.CalledProcessError as e:
+        report.print_error(f"ollama pull failed: {e}")
+        raise typer.Exit(1)
+
+    if set_active:
+        config_store.set_model("ollama", chosen)
+        config_store.use_provider("ollama")
+        console.print(f"[green]saved[/green] — active provider set to ollama / {chosen}")
 
 
 if __name__ == "__main__":
