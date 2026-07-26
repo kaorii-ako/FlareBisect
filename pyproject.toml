@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
-    { name = "flarebisect contributors" },
+    { name = "Tawin Tangsukson" },
 ]
 keywords = ["git", "bisect", "testing", "flaky-tests", "cli", "debugging"]
 classifiers = [

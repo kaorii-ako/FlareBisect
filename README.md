@@ -1,8 +1,12 @@
-# flarebisect 🔥
+# FlareBisect 🔥
 
 [![PyPI](https://img.shields.io/pypi/v/flarebisect.svg)](https://pypi.org/project/flarebisect/)
 [![CI](https://github.com/kaorii-ako/FlareBisect/actions/workflows/ci.yml/badge.svg)](https://github.com/kaorii-ako/FlareBisect/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+FlareBisect finds the commit that made your tests flaky, not just the one
+that broke them: it bisects on flake-rate drift instead of pass/fail, then
+flares the culprit with an AI-written root cause.
 
 `git bisect` gives you confidently wrong answers when the test you're
 bisecting on is flaky — it treats every run as a clean pass/fail signal, so
