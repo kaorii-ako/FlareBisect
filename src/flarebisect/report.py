@@ -31,12 +31,8 @@ BAR_COLOR = {
 }
 
 
-def print_header(good: str, bad: str, test_cmd: str, runs: int, threshold: float) -> None:
-    console.print()
-    console.print(f"[bold]$[/bold] flarebisect run --good {good} --bad {bad} --test \"{test_cmd}\"")
-
-
 def print_progress_line(total_commits: int, runs: int, workers: int) -> None:
+    console.print()
     console.print(
         f"[dim]{total_commits} commits in range · {runs} runs per commit · "
         f"parallel worktrees ({workers} workers)[/dim]"

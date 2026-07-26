@@ -61,8 +61,6 @@ def run(
         report.print_error(str(e))
         raise typer.Exit(1)
 
-    report.print_header(good, bad, test, runs, threshold)
-
     def on_measure(label: str, m) -> None:
         pass  # table is rendered once, after the search completes
 
