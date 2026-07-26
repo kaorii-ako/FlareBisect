@@ -31,6 +31,23 @@ BAR_COLOR = {
 }
 
 
+def print_banner() -> None:
+    dot_styles = ["grey35", "grey42", "grey50", "gold3", "dark_orange", "bold dark_orange"]
+    spark_col = 3 * (len(dot_styles) - 1)
+
+    console.print()
+    console.print(Text(" " * spark_col + "✦", style="bold dark_orange"))
+
+    line = Text()
+    for i, style in enumerate(dot_styles):
+        if i:
+            line.append("──", style="grey19")
+        line.append("●", style=style)
+    line.append("   ")
+    line.append("FlareBisect", style="bold white")
+    console.print(line)
+
+
 def print_progress_line(total_commits: int, runs: int, workers: int) -> None:
     console.print()
     console.print(

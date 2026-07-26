@@ -52,6 +52,7 @@ def run(
     ),
 ) -> None:
     """Bisect on flake-rate jump instead of pass/fail."""
+    report.print_banner()
     repo = repo.resolve()
 
     try:
