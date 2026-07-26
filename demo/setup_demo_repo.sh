@@ -133,7 +133,7 @@ echo "Demo repo ready at: $DEMO_DIR"
 echo
 echo "Try:"
 echo "  flarebisect run --repo $DEMO_DIR --good good --bad bad \\"
-echo "    --test 'python -m pytest test_counter.py -q' --runs 8"
+echo "    --test 'python -m pytest test_counter.py -q'"
 echo
-echo "(--runs 8 rather than the default 5: the seeded bug is a genuine race,"
-echo " and 5 samples occasionally undersamples it into a false negative)"
+echo "(uses the CLI default of 20 runs - the seeded bug is a genuine race,"
+echo " so lower sample counts can occasionally undersample it into a false negative)"

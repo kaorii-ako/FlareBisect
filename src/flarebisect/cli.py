@@ -39,7 +39,7 @@ def run(
     bad: str = typer.Option(..., "--bad", help="Known-bad (or known-flaky) commit/ref."),
     test: str = typer.Option(..., "--test", help="Test command to run, e.g. 'pytest -k my_test'."),
     repo: Path = typer.Option(Path.cwd(), "--repo", help="Path to the git repository."),
-    runs: int = typer.Option(5, "--runs", help="Test runs per commit."),
+    runs: int = typer.Option(20, "--runs", help="Test runs per commit."),
     threshold: float = typer.Option(0.3, "--threshold", help="Flake-rate jump that counts as the culprit (0-1)."),
     explain: bool = typer.Option(True, "--explain/--no-explain", help="Call an LLM for a root-cause explanation."),
     provider: Optional[str] = typer.Option(

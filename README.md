@@ -19,9 +19,7 @@ finds the commit where that rate jumps — then asks an LLM to explain, in
 plain English, whether the commit broke the test cleanly or made it flakier.
 
 ```
-$ flarebisect run --good a1b2c3 --bad HEAD --test "npm test -- counter"
-
-12 commits in range · 5 runs per commit · parallel worktrees
+12 commits in range · 20 runs per commit · parallel worktrees
 
 commit   flake rate                                  result  status
 a1b2c3                                                  5/5  good
@@ -112,12 +110,14 @@ flarebisect run \
   --good <known-good-sha> \
   --bad <known-bad-sha> \
   --test "pytest -k my_flaky_test" \
-  --runs 5 \
+  --runs 20 \
   --threshold 0.3
 ```
 
-- `--runs` — test executions per commit (default 5), run in parallel
-  (capped at your core count so it doesn't oversubscribe).
+- `--runs` — test executions per commit (default 20), run in parallel
+  (capped at your core count so it doesn't oversubscribe). Lower counts are
+  faster but noisier — a low sample can misattribute the culprit near the
+  threshold boundary.
 - `--threshold` — flake-rate jump (0-1) vs. the `good` baseline required to
   call a commit the culprit (default 0.3).
 - `--no-explain` — skip the LLM root-cause call entirely (fully offline).

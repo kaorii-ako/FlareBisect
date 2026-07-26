@@ -16,13 +16,13 @@ Run:
 ```bash
 bash setup_demo_repo.sh
 flarebisect run --repo ./flaky-counter --good good --bad bad \
-  --test "python -m pytest test_counter.py -q" --runs 8
+  --test "python -m pytest test_counter.py -q"
 ```
 
-`--runs 8` rather than the CLI default of 5: the seeded bug is a genuine
-race, not a scripted number, so at very low sample counts it can occasionally
-undersample into a false negative on one binary-search step. 8 runs is
-comfortably stable for a live take.
+The seeded bug is a genuine race, not a scripted number, so at low sample
+counts it can occasionally undersample into a false negative on one
+binary-search step. The CLI default of 20 runs is comfortably stable for a
+live take; drop `--runs` lower only if you want to see that noise firsthand.
 
 No network access is required for the bisection itself. The root-cause
 explanation needs a configured provider — either a cloud key
