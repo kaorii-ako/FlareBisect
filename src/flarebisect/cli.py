@@ -4,14 +4,24 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from rich.panel import Panel
+from rich.prompt import Confirm, Prompt
 
 from . import __version__, ai_explain, config as config_store, git_ops, report
 from .bisect import run_bisect
-from .providers import PROVIDERS, ProviderError
+from .providers import DEFAULT_BASE_URLS, DEFAULT_MODELS, NO_KEY_REQUIRED, PROVIDERS, ProviderError
 
 app = typer.Typer(add_completion=False, help="git bisect that treats flakiness as a signal, not noise.")
 config_app = typer.Typer(add_completion=False, help="Manage stored AI provider settings.")
 app.add_typer(config_app, name="config")
+
+PROVIDER_BLURBS = {
+    "anthropic": "Claude, cloud, needs an API key",
+    "openai": "GPT models, cloud, needs an API key",
+    "google": "Gemini, cloud, needs an API key",
+    "ollama": "local model via Ollama, no key needed",
+    "custom": "any OpenAI-compatible endpoint (LM Studio, llama.cpp, vLLM...)",
+}
 
 
 @app.command()
@@ -81,6 +91,79 @@ def run(
 
     report.print_result(outcome, threshold, explanation)
     report.print_footer(outcome.elapsed_seconds, len(outcome.measurements), outcome.workers)
+
+
+@config_app.callback(invoke_without_command=True)
+def config_main(ctx: typer.Context) -> None:
+    """Manage stored AI provider settings. Run with no subcommand for a guided setup."""
+    if ctx.invoked_subcommand is None:
+        config_wizard()
+
+
+def config_wizard() -> None:
+    console = report.console
+    console.print()
+    console.print(Panel.fit("[bold]flarebisect setup[/bold] — pick an AI provider for root-cause explanations", border_style="grey50"))
+
+    console.print()
+    console.print("[bold]step 1/4[/bold] — provider")
+    for i, name in enumerate(PROVIDERS, start=1):
+        console.print(f"  [cyan]{i}[/cyan]) {name:<10} [dim]{PROVIDER_BLURBS[name]}[/dim]")
+    choice = Prompt.ask("  choose", choices=[str(i) for i in range(1, len(PROVIDERS) + 1)], default="1")
+    provider = PROVIDERS[int(choice) - 1]
+
+    base_url = None
+    api_key = None
+
+    if provider in ("ollama", "custom"):
+        console.print()
+        console.print("[bold]step 2/4[/bold] — endpoint")
+        default_url = DEFAULT_BASE_URLS.get(provider, "http://localhost:11434/v1")
+        base_url = Prompt.ask("  base URL", default=default_url)
+
+        if provider in NO_KEY_REQUIRED:
+            needs_key = Confirm.ask("  does this endpoint require an API key?", default=False)
+        else:
+            needs_key = True
+        if needs_key:
+            api_key = Prompt.ask("  API key", password=True)
+    else:
+        console.print()
+        console.print("[bold]step 2/4[/bold] — API key")
+        console.print(f"  [dim]leave blank to fall back to the {config_store.ENV_KEYS.get(provider)} env var[/dim]")
+        entered = Prompt.ask("  API key", password=True, default="", show_default=False)
+        api_key = entered or None
+
+    console.print()
+    console.print("[bold]step 3/4[/bold] — model")
+    default_model = DEFAULT_MODELS.get(provider, "")
+    model = Prompt.ask("  model", default=default_model)
+
+    console.print()
+    console.print("[bold]step 4/4[/bold] — confirm")
+    make_active = Confirm.ask(f"  set '{provider}' as the active provider?", default=True)
+
+    if api_key:
+        config_store.set_key(provider, api_key)
+    if model:
+        config_store.set_model(provider, model)
+    if base_url:
+        config_store.set_base_url(provider, base_url)
+    if make_active:
+        config_store.use_provider(provider)
+
+    masked_key = f"...{api_key[-4:]}" if api_key and len(api_key) > 4 else ("(none)" if not api_key else "(set)")
+    console.print()
+    console.print(
+        Panel.fit(
+            f"[bold green]saved[/bold green] — provider={provider}  model={model}\n"
+            f"key={masked_key}"
+            + (f"  base_url={base_url}" if base_url else "")
+            + f"\n\n[dim]config file: {config_store.config_path()}[/dim]\n"
+            f"[dim]next: flarebisect run --good <sha> --bad <sha> --test \"...\"[/dim]",
+            border_style="green",
+        )
+    )
 
 
 @config_app.command("set-key")
