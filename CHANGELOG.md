@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.0] - 2026-07-26
+
+### Added
+- First public release on PyPI 🎉
+- Published via trusted publishing (OIDC) — `pip install flarebisect`
+
 ## [0.3.1] - 2026-07-26
 
 ### Changed
