@@ -1,5 +1,9 @@
 # flarebisect 🔥
 
+[![PyPI](https://img.shields.io/pypi/v/flarebisect.svg)](https://pypi.org/project/flarebisect/)
+[![CI](https://github.com/flarebisect/flarebisect/actions/workflows/ci.yml/badge.svg)](https://github.com/flarebisect/flarebisect/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 `git bisect` gives you confidently wrong answers when the test you're
 bisecting on is flaky — it treats every run as a clean pass/fail signal, so
 a test that was already unstable *before* you started bisecting can point
@@ -13,8 +17,15 @@ plain English, whether the commit broke the test cleanly or made it flakier.
 ## Install
 
 ```bash
-pip install -e .
+pip install flarebisect
 export ANTHROPIC_API_KEY=sk-...   # only needed for --explain (on by default)
+```
+
+For local development:
+
+```bash
+pip install -e ".[dev]"
+pytest -q
 ```
 
 ## Usage
@@ -55,6 +66,12 @@ bisect against with no network access required.
 6. Claude gets the culprit's diff + the flake-rate evidence and explains the
    likely root cause (race condition, shared mutable state, timing
    assumption, etc.).
+
+## Releasing
+
+Version is single-sourced from `src/flarebisect/__init__.py`. Bump it, commit,
+tag (`vX.Y.Z`), and cut a GitHub Release — `.github/workflows/publish.yml`
+builds and publishes to PyPI via trusted publishing (OIDC, no stored token).
 
 ## License
 

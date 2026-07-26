@@ -4,19 +4,61 @@ build-backend = "hatchling.build"
 
 [project]
 name = "flarebisect"
-version = "0.1.0"
+dynamic = ["version"]
 description = "git bisect that treats flakiness as a signal, not noise"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
+authors = [
+    { name = "flarebisect contributors" },
+]
+keywords = ["git", "bisect", "testing", "flaky-tests", "cli", "debugging"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Version Control :: Git",
+]
 dependencies = [
     "typer>=0.12",
     "rich>=13.7",
     "anthropic>=0.40",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "build>=1.2",
+    "twine>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/flarebisect/flarebisect"
+Repository = "https://github.com/flarebisect/flarebisect"
+Issues = "https://github.com/flarebisect/flarebisect/issues"
+
 [project.scripts]
 flarebisect = "flarebisect.cli:app"
 
+[tool.hatch.version]
+path = "src/flarebisect/__init__.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/flarebisect"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+]
