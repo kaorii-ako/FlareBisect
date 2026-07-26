@@ -16,9 +16,16 @@ Run:
 ```bash
 bash setup_demo_repo.sh
 flarebisect run --repo ./flaky-counter --good good --bad bad \
-  --test "python -m pytest test_counter.py -q"
+  --test "python -m pytest test_counter.py -q" --runs 8
 ```
 
-No network access is required for the bisection itself — only the final
-`--explain` step calls the Anthropic API. Pass `--no-explain` to demo fully
-offline.
+`--runs 8` rather than the CLI default of 5: the seeded bug is a genuine
+race, not a scripted number, so at very low sample counts it can occasionally
+undersample into a false negative on one binary-search step. 8 runs is
+comfortably stable for a live take.
+
+No network access is required for the bisection itself. The root-cause
+explanation needs a configured provider — either a cloud key
+(`flarebisect config set-key anthropic <key>`, or openai/google) or a local
+model via Ollama (`flarebisect config use ollama`, no key needed). Pass
+`--no-explain` to demo the bisection with no AI call at all.

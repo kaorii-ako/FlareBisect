@@ -32,6 +32,7 @@ dependencies = [
     "typer>=0.12",
     "rich>=13.7",
     "anthropic>=0.40",
+    "openai>=1.40",
 ]
 
 [project.optional-dependencies]
@@ -42,9 +43,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/flarebisect/flarebisect"
-Repository = "https://github.com/flarebisect/flarebisect"
-Issues = "https://github.com/flarebisect/flarebisect/issues"
+Homepage = "https://github.com/kaorii-ako/FlareBisect"
+Repository = "https://github.com/kaorii-ako/FlareBisect"
+Issues = "https://github.com/kaorii-ako/FlareBisect/issues"
 
 [project.scripts]
 flarebisect = "flarebisect.cli:app"
@@ -62,3 +63,6 @@ include = [
     "/README.md",
     "/LICENSE",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

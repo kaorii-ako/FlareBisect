@@ -16,12 +16,15 @@ class GitError(RuntimeError):
 
 
 def _run(args: list[str], cwd: Path) -> str:
-    result = subprocess.run(
-        ["git", *args],
-        cwd=cwd,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError as e:
+        raise GitError("git not found on PATH — install git and make sure it's on PATH") from e
     if result.returncode != 0:
         raise GitError(f"git {' '.join(args)} failed: {result.stderr.strip()}")
     return result.stdout.strip()

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import shlex
+import os
 import subprocess
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -20,6 +20,12 @@ class RunResult:
         return self.failed / self.runs if self.runs else 0.0
 
 
+def worker_count_for(runs: int) -> int:
+    """Don't oversubscribe more parallel test runs than the machine has cores."""
+    cores = os.cpu_count() or 4
+    return max(1, min(runs, cores))
+
+
 def _one_run(test_cmd: str, cwd: Path) -> bool:
     result = subprocess.run(
         test_cmd,
@@ -32,7 +38,7 @@ def _one_run(test_cmd: str, cwd: Path) -> bool:
 
 
 def measure_flake_rate(test_cmd: str, cwd: Path, runs: int) -> RunResult:
-    with ThreadPoolExecutor(max_workers=runs) as pool:
+    with ThreadPoolExecutor(max_workers=worker_count_for(runs)) as pool:
         outcomes = list(pool.map(lambda _: _one_run(test_cmd, cwd), range(runs)))
     passed = sum(outcomes)
     failed = runs - passed
