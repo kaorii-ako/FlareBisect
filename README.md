@@ -31,13 +31,13 @@ a1b2c3                                                  5/5  good
 HEAD     ████████████████████████████                   1/5  bad
 
 ╭────────────────────────────────────────────────────────────────╮
-│ ✦ culprit found · commit 9c1f88                                 │
-│                                                                  │
-│ flake rate jumped 20% → 80% at this commit                      │
-│ "add request counter for rate limiting"                         │
-│                                                                  │
-│   💡 likely cause — shared counter incremented without a lock.  │
-│   concurrent test workers race on the same variable.             │
+│ ✦ culprit found · commit 9c1f88                                    │
+│                                                                        │
+│ flake rate jumped 20% → 80% at this commit                             │
+│ "add request counter for rate limiting"                                │
+│                                                                        │
+│   💡 likely cause — shared counter incremented without a lock.        │
+│   concurrent test workers race on the same variable.                   │
 ╰────────────────────────────────────────────────────────────────╯
 ⏱ 8.4s    ⚡ 5 checked    ⚙ 4 parallel workers
 ```
