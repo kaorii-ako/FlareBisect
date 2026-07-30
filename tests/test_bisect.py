@@ -1,6 +1,20 @@
 from flarebisect.bisect import classify, status_label
 
 
+def test_classify_build_break_beats_rate_based_verdicts():
+    assert classify(good_rate=0.0, culprit_rate=1.0, setup_failed=True) == "build break"
+
+
+def test_status_label_setup_failure_wins():
+    assert status_label(1.0, is_first=False, is_last=False, is_culprit=True, setup_failed=True) == "setup"
+
+
+def test_status_label_no_flare_when_nothing_was_implicated():
+    # `is_culprit` is passed False when the search found no jump, so the `bad`
+    # endpoint must not be dressed up as the flare
+    assert status_label(0.05, is_first=False, is_last=True, is_culprit=False) == "bad"
+
+
 def test_classify_clean_break():
     assert classify(good_rate=0.0, culprit_rate=1.0) == "clean break"
 

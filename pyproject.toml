@@ -5,14 +5,17 @@ build-backend = "hatchling.build"
 [project]
 name = "flarebisect"
 dynamic = ["version"]
-description = "git bisect that treats flakiness as a signal, not noise"
+description = "Language-agnostic git bisect that treats flakiness as a signal, not noise"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
     { name = "Tawin Tangsukson" },
 ]
-keywords = ["git", "bisect", "testing", "flaky-tests", "cli", "debugging"]
+keywords = [
+    "git", "bisect", "testing", "flaky-tests", "cli", "debugging",
+    "ci", "regression", "root-cause", "polyglot", "nodejs", "golang", "rust",
+]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",

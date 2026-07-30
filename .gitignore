@@ -10,3 +10,4 @@ build/
 .env
 .DS_Store
 demo/flaky-counter/
+demo/flaky-node-counter/

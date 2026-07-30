@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 
 from .providers import ProviderConfig
@@ -33,11 +34,33 @@ def config_path() -> Path:
     return config_dir() / "config.json"
 
 
+def defaults() -> dict:
+    return {"provider": DEFAULT_PROVIDER, "providers": {}}
+
+
 def load() -> dict:
+    """Read stored settings, falling back to defaults if the file is unusable.
+
+    A hand-edited or truncated config must not take the whole CLI down with a
+    JSONDecodeError — that would also break `config set-key`, the very command
+    you'd reach for to repair it. Warn and carry on with defaults instead; the
+    next `save()` rewrites the file cleanly.
+    """
     path = config_path()
     if not path.exists():
-        return {"provider": DEFAULT_PROVIDER, "providers": {}}
-    return json.loads(path.read_text())
+        return defaults()
+    try:
+        data = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError) as e:
+        print(f"warning: ignoring unreadable config at {path} ({e})", file=sys.stderr)
+        return defaults()
+    if not isinstance(data, dict):
+        print(f"warning: ignoring malformed config at {path} (expected an object)", file=sys.stderr)
+        return defaults()
+    data.setdefault("providers", {})
+    if not isinstance(data["providers"], dict):
+        data["providers"] = {}
+    return data
 
 
 def save(data: dict) -> None:

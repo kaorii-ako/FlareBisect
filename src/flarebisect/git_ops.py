@@ -22,6 +22,9 @@ def _run(args: list[str], cwd: Path) -> str:
             cwd=cwd,
             capture_output=True,
             text=True,
+            # commit subjects and diffs are whatever bytes the author committed,
+            # which is not always valid in this machine's encoding
+            errors="replace",
         )
     except FileNotFoundError as e:
         raise GitError("git not found on PATH — install git and make sure it's on PATH") from e

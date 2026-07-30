@@ -105,7 +105,7 @@ class Counter:
     def bump(self):
         # "optimization": skip locking on the hot path
         current = self.value
-        if random.random() < 0.35:  # race only lands some of the time
+        if random.random() < 0.55:  # race only lands some of the time
             time.sleep(0.0003)
         self.value = current + 1
 
